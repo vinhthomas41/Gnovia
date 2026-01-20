@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Sidebar from './pageComponents/sidebar'
 import Maininfo from './pageComponents/maininfo'
 import genshindb from 'genshin-db';
+import "./globals.css/";
 import { collection, addDoc, deleteDoc, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
@@ -16,13 +17,9 @@ const charArray: genshindb.Character[] = [];
 for(const char of charNames) {
   charArray.push(genshindb.characters(char)!);
 }
-
 export default function Home() {
-  const [currentChar, setCurrentChar] = useState<
-  typeof charArray[number] | null
-  >(null);
-  const[favoriteList, setFavoriteList] = useState<
-  string[] > ([]);
+  const [currentChar, setCurrentChar] = useState<typeof charArray[number] | null> (null);
+  const[favoriteList, setFavoriteList] = useState<string[]> ([]);
   const [userUid, setUserUid] = useState<string | null>(null);
 
   useEffect(() => {
@@ -101,7 +98,7 @@ async function removeFavorite(characterName: string) {
   }
 
   return (
-    <div className = "flex h-screen">
+    <div className = "bg-blueTest flex h-screen text-textColor1">
       <Sidebar 
         charList={charArray} 
         sendData = {childCharacterChange} 

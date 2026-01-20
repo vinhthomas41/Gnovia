@@ -5,6 +5,13 @@
   --foreground: #171717;
 }
 
+@theme {
+  --color-blueTest: #161A30;
+  --color-blueTest2: #31304D;
+  --color-blueTest3: #31304f;
+  --color-textColor1: #B6BBC4;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
