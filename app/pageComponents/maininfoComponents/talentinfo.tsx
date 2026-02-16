@@ -39,25 +39,24 @@ const talentinfo: React.FC<passedData> = ({character}) => {
     {charTalents ? (
     <div className = 'rounded bg-blueTest2 ml-10 w-95 text-center drop-shadow-black drop-shadow-lg/50'>
       <ul>
-        {talentList!.map((talent, index) => (
+        {talentList!
+        .filter(talent => talent && talent.description)
+        .map((talent, index) => (
           <li key = {index}>
-            {(talent && talent.description) ? (
             <div className=''>
-              <div id='talentButton' onClick = {() => talentEdit(talent.name)} className='mx-2 text-left hover:cursor-pointer flex flex-row'>
-                {talent.name}
-                {openTalents.includes(talent.name) ? <div className='ml-auto'>&#x23f6;</div> : <div className='ml-auto'>&#x23f7;</div>}
+              <div id='talentButton' onClick = {() => talentEdit(talent!.name)} className='mx-2 text-left hover:cursor-pointer flex flex-row'>
+                {talent!.name}
+                {openTalents.includes(talent!.name) ? <div className='ml-auto'>&#x23f6;</div> : <div className='ml-auto'>&#x23f7;</div>}
               </div>
               {openTalents.includes(talent!.name) ? (
                 <div className='border-t-2'>
-                  {talent!.description}
+                  <p className='text-left px-2'>{talent!.description}</p>
                   {isCombat(talent) ? (
-                    <>{talent.attributes.labels}</>
+                    <p className='text-left px-2'>{talent.attributes.labels}</p>
                   ) : <></>}
                 </div>
               ) : <></>}
             </div> 
-            ) : 
-            <></>}
           </li>
         ))}
       </ul>

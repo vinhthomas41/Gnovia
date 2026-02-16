@@ -24,13 +24,11 @@ export default function Home() {
 
   useEffect(() => {
     signInAnonymously(auth).catch((error) => console.error("Anonymous sign-in failed:", error));
-
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUserUid(user.uid);
       }
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -40,13 +38,13 @@ export default function Home() {
 
   async function addFavorite(characterName: string) {
   console.log("Added");
-  await addDoc(collection(db, "favorites"), {
-    charId: characterName,
-    uid: auth.currentUser!.uid
-  });
+    await addDoc(collection(db, "favorites"), {
+      charId: characterName,
+      uid: auth.currentUser!.uid
+    });
   }
 
-async function removeFavorite(characterName: string) {
+  async function removeFavorite(characterName: string) {
   console.log("remove");
   const q = query(
     collection(db, "favorites"),
@@ -55,10 +53,9 @@ async function removeFavorite(characterName: string) {
   );
 
   const snapshot = await getDocs(q);
-
-  snapshot.forEach(async (doc) => {
-    await deleteDoc(doc.ref);
-  });
+    snapshot.forEach(async (doc) => {
+      await deleteDoc(doc.ref);
+    });
   }
 
   useEffect(() => {
@@ -106,7 +103,6 @@ async function removeFavorite(characterName: string) {
       />
       <Maininfo character = {currentChar} />
     </div>
-    
   );
 }
 

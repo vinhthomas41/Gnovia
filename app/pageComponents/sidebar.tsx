@@ -17,10 +17,10 @@ const sidebar: React.FC<passedData> = ({charList, sendData, favorites, favoriteC
   return(
       <div className = "border-r-2 border-white w-60 min-h-screen overflow-y-auto" id = "sidebar">
         <div
-          className='flex justify-center border-2 w-full cursor-pointer py-3 rounded-lg'
+          className='flex sticky top-0 justify-center border-2 w-full cursor-pointer py-3 rounded-lg bg-blueTest2 z-10'
           onClick={() => setFavoriteMode(!favoriteMode)}
         >
-          Favorite
+          {(favoriteMode ? <>Favorites: on</> : <>Favorites: off</>)}
         </div>
         <ul className = "space-y-4" id = "sidebarList">
           {charList
