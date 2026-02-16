@@ -68,7 +68,6 @@ async function removeFavorite(characterName: string) {
     const ids = snapshot.docs.map((doc) => doc.data().charId as string);
     setFavoriteList(ids);
   }
-
   loadFavorites();
   }, [userUid]);
 

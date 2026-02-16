@@ -6,7 +6,7 @@ interface passedData {
 }
 
 const talentinfo: React.FC<passedData> = ({character}) => {
-  const charTalents = talents(character!.name);
+  const charTalents =  talents(character!.name);
   const talentList: (CombatTalentDetail | PassiveTalentDetail | undefined)[]  | undefined = charTalents ?
   ([charTalents!.combat1, charTalents!.combat2, charTalents!.combat3, charTalents!.combatju, charTalents!.combatsp,
     charTalents!.passive1, charTalents!.passive2, charTalents!.passive3, charTalents!.passive4]) : undefined;
