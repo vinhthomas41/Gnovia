@@ -11,7 +11,7 @@ interface passedData {
     favoriteClick: (char: genshindb.Character) => void;
 }
 
-const sidebar: React.FC<passedData> = ({charList, sendData, favorites, favoriteClick}) => {
+const Sidebar: React.FC<passedData> = ({charList, sendData, favorites, favoriteClick}) => {
   const[favoriteMode, setFavoriteMode] = useState<boolean>(false);
 
   return(
@@ -58,4 +58,4 @@ const sidebar: React.FC<passedData> = ({charList, sendData, favorites, favoriteC
     </div>
   )
 }
-export default sidebar;
+export default Sidebar;
