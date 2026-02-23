@@ -1,61 +1,93 @@
 "use client";
-import React, {useState} from 'react';
-import genshindb from 'genshin-db';
-import starS from '../../public/selectedStar.png';
-import star from '../../public/Star.png';
-
+import React, { useState } from "react";
+import genshindb from "genshin-db";
+import starS from "../../public/selectedStar.png";
+import star from "../../public/Star.png";
+import Image from "next/image";
 interface passedData {
-    charList: genshindb.Character[];
-    sendData: (newChar: genshindb.Character) => void;
-    favorites: string[] | null;
-    favoriteClick: (char: genshindb.Character) => void;
+  charList: genshindb.Character[];
+  sendData: (newChar: genshindb.Character) => void;
+  favorites: string[] | null;
+  favoriteClick: (char: genshindb.Character) => void;
 }
 
-const Sidebar: React.FC<passedData> = ({charList, sendData, favorites, favoriteClick}) => {
-  const[favoriteMode, setFavoriteMode] = useState<boolean>(false);
+const Sidebar: React.FC<passedData> = ({
+  charList,
+  sendData,
+  favorites,
+  favoriteClick,
+}) => {
+  const [favoriteMode, setFavoriteMode] = useState<boolean>(false);
 
-  return(
-      <div className = "border-r-2 border-white w-60 min-h-screen overflow-y-auto" id = "sidebar">
-        <div
-          className='flex sticky top-0 justify-center border-2 w-full cursor-pointer py-3 rounded-lg bg-blueTest2 z-10'
-          onClick={() => setFavoriteMode(!favoriteMode)}
-        >
-          {(favoriteMode ? <>Favorites: on</> : <>Favorites: off</>)}
-        </div>
-        <ul className = "space-y-4" id = "sidebarList">
-          {charList
-          .filter(character => ((favoriteMode && favorites?.includes(character.name)) || (!favoriteMode)))
+  return (
+    <div
+      className="min-h-screen w-60 overflow-y-auto border-r-2 border-white"
+      id="sidebar"
+    >
+      <div
+        className="bg-blueTest2 sticky top-0 z-10 flex w-full cursor-pointer justify-center rounded-lg border-2 py-3"
+        onClick={() => setFavoriteMode(!favoriteMode)}
+      >
+        {favoriteMode ? <>Favorites: on</> : <>Favorites: off</>}
+      </div>
+      <ul className="space-y-4" id="sidebarList">
+        {charList
+          .filter(
+            (character) =>
+              (favoriteMode && favorites?.includes(character.name)) ||
+              !favoriteMode,
+          )
           .map((character) => (
             <li
-              key = {character.name}
-              className = "p-2 cursor-pointer rounded flex items-center px-5  "
-              onClick = {() => sendData(character)}
+              key={character.name}
+              className="flex cursor-pointer items-center rounded p-2 px-5"
+              onClick={() => sendData(character)}
             >
-              <img src = {character.images.hoyowiki_icon}  alt = {character.images.hoyowiki_icon} className="w-14"/>
+              {character.images.hoyowiki_icon ? (
+                <Image
+                  src={character.images.hoyowiki_icon}
+                  alt={character.name}
+                  width={56}
+                  height={56}
+                  className="w-14"
+                />
+              ) : (
+                <div className="h-14 w-14 rounded bg-gray-700" />
+              )}
               {character.name}
-              <div className='relative group w-7 ml-auto'>
-                {(!favorites!.includes(character.name) ? (
-                <>
-                  <img 
-                    src = {star.src} 
-                    className='absolute opacity-100 group-hover:opacity-0' 
-                    onClick={() => favoriteClick(character)}/>
-                  <img 
-                    src = {starS.src} 
-                    className='opacity-0 group-hover:opacity-100 onClick:opacity-0' 
-                  />
-                </>
+              <div className="group relative ml-auto w-7">
+                {!favorites!.includes(character.name) ? (
+                  <>
+                    <Image
+                      src={star.src}
+                      alt="star"
+                      className="absolute opacity-100 group-hover:opacity-0"
+                      width={28}
+                      height={28}
+                      onClick={() => favoriteClick(character)}
+                    />
+                    <Image
+                      src={starS.src}
+                      alt="selected star"
+                      width={28}
+                      height={28}
+                      className="onClick:opacity-0 opacity-0 group-hover:opacity-100"
+                    />
+                  </>
                 ) : (
-                  <img 
-                    src = {starS.src} 
+                  <Image
+                    src={starS.src}
+                    alt="selected star"
+                    width={28}
+                    height={28}
                     onClick={() => favoriteClick(character)}
                   />
-                ))}
+                )}
               </div>
             </li>
           ))}
-        </ul>
+      </ul>
     </div>
-  )
-}
+  );
+};
 export default Sidebar;
