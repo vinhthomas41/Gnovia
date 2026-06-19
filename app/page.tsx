@@ -1,13 +1,17 @@
 import React from 'react';
 import Link from 'next/link';
+import PolygonBackground from '@/app/pageComponents/polygonBackground';
 
 export default function Home() {
   return (
-    <div className="bg-blueTest text-white min-h-screen font-mono h-screen flex flex-col">
-      <nav className="border-b border-white/20 px-8 py-4 flex items-center justify-between">
+    <div className="bg-blueTest text-white min-h-screen font-mono h-screen flex flex-col relative overflow-hidden">
+      <PolygonBackground />
+
+      <nav className="relative z-10 border-b border-white/20 px-8 py-4 flex items-center justify-between">
         <h1 className="text-2xl font-black tracking-widest uppercase">GenshinDB</h1>
       </nav>
-      <div className="grid grid-cols-3 border-b border-white/20 flex-3">
+
+      <div className="relative z-10 grid grid-cols-3 border-b border-white/20 flex-3">
         <div className="col-span-2 border-r border-white/20 p-8">
           <p className="text-xs text-white/50 uppercase tracking-widest mb-2">Database</p>
           <h2 className="text-5xl font-black leading-tight mb-4">The Complete Genshin Impact Character Index</h2>
@@ -21,7 +25,8 @@ export default function Home() {
           </Link>
         </div>
       </div>
-      <div className="grid grid-cols-3 divide-x divide-white/20  flex-1">
+
+      <div className="relative z-10 grid grid-cols-3 divide-x divide-white/20 flex-1">
         {["Characters", "Placeholder", "Materials"].map((item) => (
           <div key={item} className="p-6 hover:bg-white/5 transition-colors cursor-pointer">
             <p className="text-xs text-white/50 uppercase tracking-widest mb-1">Feature</p>
