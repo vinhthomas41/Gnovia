@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import genshindb from "genshin-db";
 import Talentinfo from "./maininfoComponents/talentinfo";
-import PolygonBackground from './pageComponents/polygonBackground';
 
 interface passedData {
   character: genshindb.Character | null;
