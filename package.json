@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "firebase": "^12.7.0",
-    "genshin-db": "^5.2.8",
+    "genshin-db": "^5.2.11",
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3"

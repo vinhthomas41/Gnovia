@@ -1,116 +1,34 @@
-"use client";
-import { useEffect, useState } from "react";
-import Sidebar from "./pageComponents/sidebar";
-import Maininfo from "./pageComponents/maininfo";
-import genshindb from "genshin-db";
-import "./globals.css/";
-import {
-  collection,
-  addDoc,
-  deleteDoc,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
+import React from 'react';
+import Link from 'next/link';
 
-const auth = getAuth();
-
-const charNames = genshindb.characters("names", { matchCategories: true });
-const charArray: genshindb.Character[] = [];
-
-for (const char of charNames) {
-  charArray.push(genshindb.characters(char)!);
-}
 export default function Home() {
-  const [currentChar, setCurrentChar] = useState<
-    (typeof charArray)[number] | null
-  >(null);
-  const [favoriteList, setFavoriteList] = useState<string[]>([]);
-  const [userUid, setUserUid] = useState<string | null>(null);
-
-  useEffect(() => {
-    signInAnonymously(auth).catch((error) =>
-      console.error("Anonymous sign-in failed:", error),
-    );
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserUid(user.uid);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const childCharacterChange = (newChar: genshindb.Character) => {
-    setCurrentChar(newChar);
-  };
-
-  async function addFavorite(characterName: string) {
-    console.log("Added");
-    await addDoc(collection(db, "favorites"), {
-      charId: characterName,
-      uid: auth.currentUser!.uid,
-    });
-  }
-
-  async function removeFavorite(characterName: string) {
-    console.log("remove");
-    const q = query(
-      collection(db, "favorites"),
-      where("charId", "==", characterName),
-      where("uid", "==", auth.currentUser!.uid),
-    );
-
-    const snapshot = await getDocs(q);
-    snapshot.forEach(async (doc) => {
-      await deleteDoc(doc.ref);
-    });
-  }
-
-  useEffect(() => {
-    async function loadFavorites() {
-      const q = query(collection(db, "favorites"), where("uid", "==", userUid));
-      const snapshot = await getDocs(q);
-      const ids = snapshot.docs.map((doc) => doc.data().charId as string);
-      setFavoriteList(ids);
-    }
-    loadFavorites();
-  }, [userUid]);
-
-  const favoriteEdit = (char: genshindb.Character) => {
-    const newArray = [];
-    const contained = favoriteList!.includes(char.name);
-    if (contained) {
-      const indexToRemove = favoriteList!.indexOf(char.name);
-      for (let i: number = 0; i < favoriteList!.length; i++) {
-        if (i != indexToRemove) {
-          newArray.push(favoriteList![i]);
-        }
-      }
-    } else {
-      for (let i: number = 0; i < favoriteList!.length; i++) {
-        newArray.push(favoriteList![i]);
-      }
-      newArray.push(char.name);
-    }
-    setFavoriteList(newArray);
-    if (contained) {
-      removeFavorite(char.name);
-    } else {
-      addFavorite(char.name);
-    }
-  };
-
   return (
-    <div className="bg-blueTest text-textColor1 flex h-screen">
-      <Sidebar
-        charList={charArray}
-        sendData={childCharacterChange}
-        favorites={favoriteList}
-        favoriteClick={favoriteEdit}
-      />
-      <Maininfo character={currentChar} />
+    <div className="bg-blueTest text-white min-h-screen font-mono h-screen flex flex-col">
+      <nav className="border-b border-white/20 px-8 py-4 flex items-center justify-between">
+        <h1 className="text-2xl font-black tracking-widest uppercase">GenshinDB</h1>
+      </nav>
+      <div className="grid grid-cols-3 border-b border-white/20 flex-3">
+        <div className="col-span-2 border-r border-white/20 p-8">
+          <p className="text-xs text-white/50 uppercase tracking-widest mb-2">Database</p>
+          <h2 className="text-5xl font-black leading-tight mb-4">The Complete Genshin Impact Character Index</h2>
+          <p className="text-white/60 text-sm max-w-lg">Stats, talents, and material requirements for every character</p>
+        </div>
+        <div className="p-8 flex flex-col justify-between">
+          <p className="text-xs text-white/50 uppercase tracking-widest mb-2">Quick Access</p>
+          <Link href="/characters" className="mt-auto border border-white/20 p-4 hover:bg-white/10 transition-colors">
+            <p className="text-xs text-white/50 uppercase mb-1">Browse</p>
+            <p className="text-lg font-bold">Characters →</p>
+          </Link>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 divide-x divide-white/20  flex-1">
+        {["Characters", "Placeholder", "Materials"].map((item) => (
+          <div key={item} className="p-6 hover:bg-white/5 transition-colors cursor-pointer">
+            <p className="text-xs text-white/50 uppercase tracking-widest mb-1">Feature</p>
+            <p className="font-bold">{item}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
