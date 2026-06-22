@@ -8,7 +8,7 @@ export default function Home() {
       <PolygonBackground />
 
       <nav className="relative z-10 border-b border-white/20 px-8 py-4 flex items-center justify-between">
-        <h1 className="text-2xl font-black tracking-widest uppercase">GenshinDB</h1>
+        <h1 className="text-2xl font-black tracking-widest uppercase">Gnovia</h1>
       </nav>
 
       <div className="relative z-10 grid grid-cols-3 border-b border-white/20 flex-3">
