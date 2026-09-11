@@ -9,6 +9,12 @@ const ENKA_USER_AGENT = "genshin-char-db/1.0 (contact: vinhthomas41@gmail.com)";
 
 const UID_REGEX = /^\d{9}$/;
 
+// firebase-admin requires the Node.js runtime. Declaring this explicitly also
+// prevents a deployment adapter from moving this route to an Edge runtime.
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const maxDuration = 15;
+
 interface EnkaCacheDoc {
   data: EnkaProfile;
   ttl: number;
@@ -41,7 +47,11 @@ export async function GET(
       const cachedAtMs = cached.cachedAt?.toMillis?.() ?? 0;
       const ttlMs = (cached.ttl ?? 0) * 1000;
       if (cachedAtMs && Date.now() < cachedAtMs + ttlMs) {
-        return NextResponse.json({ ...cached.data, source: "cache", cachedAt: cachedAtMs });
+        return NextResponse.json({
+          ...cached.data,
+          source: "cache",
+          cachedAt: cachedAtMs,
+        });
       }
     }
   } catch (err) {
@@ -53,6 +63,7 @@ export async function GET(
     response = await fetch(`https://enka.network/api/uid/${uid}`, {
       headers: { "User-Agent": ENKA_USER_AGENT },
       cache: "no-store",
+      signal: AbortSignal.timeout(10_000),
     });
   } catch {
     return NextResponse.json(
@@ -91,14 +102,18 @@ export async function GET(
     case 500:
     case 503:
       return NextResponse.json(
-        { error: "Enka Network is experiencing server issues. Try again later." },
+        {
+          error: "Enka Network is experiencing server issues. Try again later.",
+        },
         { status: response.status },
       );
   }
 
   if (!response.ok) {
     return NextResponse.json(
-      { error: `Unexpected error from Enka Network (status ${response.status}).` },
+      {
+        error: `Unexpected error from Enka Network (status ${response.status}).`,
+      },
       { status: response.status },
     );
   }

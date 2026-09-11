@@ -78,12 +78,24 @@ export type EnkaApiResult =
   // cachedAt (ms epoch) marks when this data was fetched from Enka — combine with
   // ttl (seconds) to know when a manual refresh should be allowed again.
   | (EnkaProfile & { source: "live" | "cache"; cachedAt: number })
-  | { showcaseEmpty: true; playerInfo?: EnkaPlayerInfo; source: "live" | "cache" }
+  | {
+      showcaseEmpty: true;
+      playerInfo?: EnkaPlayerInfo;
+      source: "live" | "cache";
+    }
   | { error: string; retryAfterSeconds?: number };
 
 // Calls our own proxy route (app/api/enka/[uid]/route.ts), which handles Enka's rate
 // limiting, status codes, and Firestore caching server-side.
 export async function fetchEnkaProfile(uid: string): Promise<EnkaApiResult> {
   const response = await fetch(`/api/enka/${uid}`);
-  return response.json();
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (!contentType.includes("application/json")) {
+    throw new Error(
+      "The UID service returned an invalid response. Please try again after the site redeploys.",
+    );
+  }
+
+  return response.json() as Promise<EnkaApiResult>;
 }

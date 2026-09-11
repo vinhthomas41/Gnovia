@@ -159,12 +159,15 @@ export default function CharactersClient({
         ...previous,
         [genshinUid]: { status: "loaded", result },
       }));
-    } catch {
+    } catch (error: unknown) {
       setProfiles((previous) => ({
         ...previous,
         [genshinUid]: {
           status: "error",
-          message: "Couldn't reach the server.",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Couldn't reach the UID service.",
         },
       }));
     }
