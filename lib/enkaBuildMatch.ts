@@ -1,7 +1,6 @@
-import genshindb from "genshin-db";
-import { mapAvatarIdToCharacter } from "./enkaCharacterMap";
 import type { EnkaAvatarInfo } from "./enka";
 import type { LinkedUidRecord, ProfileState } from "./linkedUids";
+import type { ArchiveCharacter } from "./archiveTypes";
 
 export interface CharacterBuildMatch {
   genshinUid: string;
@@ -10,7 +9,7 @@ export interface CharacterBuildMatch {
 }
 
 export function findBuildMatches(
-  character: genshindb.Character,
+  character: ArchiveCharacter,
   linkedUids: LinkedUidRecord[],
   profiles: { [genshinUid: string]: ProfileState },
 ): CharacterBuildMatch[] {
@@ -21,9 +20,12 @@ export function findBuildMatches(
     const result = profile.result;
     if (!("avatarInfoList" in result) || !result.avatarInfoList) continue;
     for (const avatar of result.avatarInfoList) {
-      const mapped = mapAvatarIdToCharacter(avatar.avatarId);
-      if (mapped && mapped.id === character.id) {
-        matches.push({ genshinUid, nickname: result.playerInfo.nickname, avatar });
+      if (avatar.avatarId === character.id) {
+        matches.push({
+          genshinUid,
+          nickname: result.playerInfo.nickname,
+          avatar,
+        });
       }
     }
   }

@@ -1,10 +1,5 @@
-import genshindb from "genshin-db";
 import Image from "next/image";
 import type { CharacterBuildMatch } from "@/lib/enkaBuildMatch";
-import {
-  mapWeaponIdToWeapon,
-  mapArtifactSetIdToArtifact,
-} from "@/lib/enkaItemMap";
 import {
   CORE_FIGHT_PROP_IDS,
   FIGHT_PROP_LABELS,
@@ -13,12 +8,14 @@ import {
   getElementalDmgBonusPropId,
 } from "@/lib/enkaFightProp";
 import type { EnkaEquip } from "@/lib/enka";
+import type { ArchiveCharacter, ArchiveItemNames } from "@/lib/archiveTypes";
 
 interface passedData {
-  character: genshindb.Character;
+  character: ArchiveCharacter;
   matches: CharacterBuildMatch[];
   selectedIndex: number;
   onSelectIndex: (index: number) => void;
+  itemNames: ArchiveItemNames;
 }
 
 const ICON_BASE = "https://enka.network/ui/";
@@ -43,6 +40,7 @@ const BuildInfo: React.FC<passedData> = ({
   matches,
   selectedIndex,
   onSelectIndex,
+  itemNames,
 }) => {
   if (matches.length === 0) return null;
   const selected = matches[Math.min(selectedIndex, matches.length - 1)];
@@ -53,8 +51,8 @@ const BuildInfo: React.FC<passedData> = ({
   const constellationCount = avatar.talentIdList?.length ?? 0;
 
   const weaponEquip = avatar.equipList.find((equip) => equip.weapon);
-  const weapon = weaponEquip
-    ? mapWeaponIdToWeapon(weaponEquip.itemId)
+  const weaponName = weaponEquip
+    ? itemNames.weapons[String(weaponEquip.itemId)]
     : undefined;
   const refinement = weaponEquip?.weapon?.affixMap
     ? Object.values(weaponEquip.weapon.affixMap)[0]
@@ -120,13 +118,13 @@ const BuildInfo: React.FC<passedData> = ({
             <div className="flex items-center gap-2">
               <Image
                 src={`${ICON_BASE}${weaponEquip.flat.icon}.png`}
-                alt={weapon?.name ?? "Weapon"}
+                alt={weaponName ?? "Weapon"}
                 width={40}
                 height={40}
                 unoptimized
               />
               <div>
-                <p className="text-sm">{weapon?.name ?? "Unknown Weapon"}</p>
+                <p className="text-sm">{weaponName ?? "Unknown Weapon"}</p>
                 <p className="text-xs text-white/50">
                   R{refinement + 1} · Lv {weaponEquip.weapon?.level ?? "?"}
                 </p>
@@ -157,8 +155,8 @@ const BuildInfo: React.FC<passedData> = ({
         {SLOT_ORDER.map((slot) => {
           const equip = artifactsBySlot.get(slot);
           if (!equip) return null;
-          const artifactSet = equip.flat.setId
-            ? mapArtifactSetIdToArtifact(equip.flat.setId)
+          const artifactSetName = equip.flat.setId
+            ? itemNames.artifacts[String(equip.flat.setId)]
             : undefined;
           const mainstat = equip.flat.reliquaryMainstat;
           const mainstatFormatted = mainstat
@@ -179,7 +177,7 @@ const BuildInfo: React.FC<passedData> = ({
                     {SLOT_LABELS[slot]}
                   </p>
                   <p className="text-xs text-white/70">
-                    {artifactSet?.name ?? "Unknown Set"}
+                    {artifactSetName ?? "Unknown Set"}
                   </p>
                 </div>
               </div>

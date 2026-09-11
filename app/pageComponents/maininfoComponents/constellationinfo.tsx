@@ -1,8 +1,8 @@
-import genshindb, { constellations, ConstellationDetail } from "genshin-db";
 import { useState } from "react";
+import type { ArchiveCharacter } from "@/lib/archiveTypes";
 
 interface passedData {
-  character: genshindb.Character | null;
+  character: ArchiveCharacter | null;
   unlockedCount?: number;
 }
 
@@ -10,18 +10,7 @@ const Constellationinfo: React.FC<passedData> = ({
   character,
   unlockedCount,
 }) => {
-  const charConstellations = constellations(character!.name);
-  const constellationList: ConstellationDetail[] | undefined =
-    charConstellations
-      ? [
-          charConstellations.c1,
-          charConstellations.c2,
-          charConstellations.c3,
-          charConstellations.c4,
-          charConstellations.c5,
-          charConstellations.c6,
-        ]
-      : undefined;
+  const constellationList = character?.constellations ?? [];
 
   const [openConstellations, changeConstellations] = useState<string[]>([]);
 
@@ -49,7 +38,7 @@ const Constellationinfo: React.FC<passedData> = ({
 
   return (
     <div>
-      {charConstellations ? (
+      {constellationList.length > 0 ? (
         <div className="archive-panel w-80">
           <div className="archive-panel-header px-4 py-3">
             <p className="text-glow text-xs tracking-widest uppercase">
@@ -57,7 +46,7 @@ const Constellationinfo: React.FC<passedData> = ({
             </p>
           </div>
           <ul className="archive-accordion">
-            {constellationList!.map((constellation, index) => {
+            {constellationList.map((constellation, index) => {
               const unlocked =
                 unlockedCount !== undefined && index < unlockedCount;
               const locked = unlockedCount !== undefined && !unlocked;

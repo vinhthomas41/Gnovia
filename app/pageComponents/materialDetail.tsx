@@ -4,18 +4,40 @@ import { materialIconUrl } from "@/lib/materialInfo";
 
 interface passedData {
   material: MaterialInfo | null;
+  selectedName?: string;
+  loading?: boolean;
+  error?: boolean;
 }
 
-const MaterialDetail: React.FC<passedData> = ({ material }) => {
+const MaterialDetail: React.FC<passedData> = ({
+  material,
+  selectedName,
+  loading,
+  error,
+}) => {
   if (!material) {
     return (
       <main
         className="archive-detail max-w-screen overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         id="materialDetail"
       >
-        <h2 className="p-8 text-xs tracking-widest text-white/50 uppercase">
-          Choose a material.
-        </h2>
+        {loading ? (
+          <div className="archive-detail-status" role="status">
+            <span className="archive-detail-spinner" aria-hidden="true" />
+            Loading {selectedName}’s records…
+          </div>
+        ) : error && selectedName ? (
+          <div
+            className="archive-detail-status archive-detail-error"
+            role="alert"
+          >
+            Couldn’t load {selectedName}’s records. Refresh to try again.
+          </div>
+        ) : (
+          <h2 className="p-8 text-xs tracking-widest text-white/50 uppercase">
+            Choose a material.
+          </h2>
+        )}
       </main>
     );
   }

@@ -1,13 +1,9 @@
-import genshindb, {
-  talents,
-  CombatTalentDetail,
-  PassiveTalentDetail,
-} from "genshin-db";
 import { useState } from "react";
 import type { CombatTalentLevelDefaults } from "@/lib/enkaSkillSlots";
+import type { ArchiveCharacter, ArchiveTalent } from "@/lib/archiveTypes";
 
 interface passedData {
-  character: genshindb.Character | null;
+  character: ArchiveCharacter | null;
   talentLevelDefaults?: CombatTalentLevelDefaults;
 }
 
@@ -39,22 +35,7 @@ const Talentinfo: React.FC<passedData> = ({
   character,
   talentLevelDefaults,
 }) => {
-  const charTalents = talents(character!.name);
-  const talentList:
-    | (CombatTalentDetail | PassiveTalentDetail | undefined)[]
-    | undefined = charTalents
-    ? [
-        charTalents.combat1,
-        charTalents.combat2,
-        charTalents.combat3,
-        charTalents.combatju,
-        charTalents.combatsp,
-        charTalents.passive1,
-        charTalents.passive2,
-        charTalents.passive3,
-        charTalents.passive4,
-      ]
-    : undefined;
+  const talentList = character?.talents ?? [];
 
   const [openTalents, changeTalents] = useState<string[]>([]);
   const [talentLevels, setTalentLevels] = useState<{
@@ -63,13 +44,13 @@ const Talentinfo: React.FC<passedData> = ({
     // Seed the level selector from a linked build's actual talent levels, when one exists,
     // instead of always defaulting to 1.
     const initial: { [name: string]: number } = {};
-    if (charTalents && talentLevelDefaults) {
+    if (talentList.length >= 3 && talentLevelDefaults) {
       if (talentLevelDefaults.combat1 !== undefined)
-        initial[charTalents.combat1.name] = talentLevelDefaults.combat1;
+        initial[talentList[0].name] = talentLevelDefaults.combat1;
       if (talentLevelDefaults.combat2 !== undefined)
-        initial[charTalents.combat2.name] = talentLevelDefaults.combat2;
+        initial[talentList[1].name] = talentLevelDefaults.combat2;
       if (talentLevelDefaults.combat3 !== undefined)
-        initial[charTalents.combat3.name] = talentLevelDefaults.combat3;
+        initial[talentList[2].name] = talentLevelDefaults.combat3;
     }
     return initial;
   });
@@ -114,10 +95,10 @@ const Talentinfo: React.FC<passedData> = ({
     changeTalents(newArray);
   };
 
-  function isCombat(
-    talent: CombatTalentDetail | PassiveTalentDetail | undefined,
-  ): talent is CombatTalentDetail {
-    return (talent as CombatTalentDetail).attributes !== undefined;
+  function isCombat(talent: ArchiveTalent): talent is ArchiveTalent & {
+    attributes: NonNullable<ArchiveTalent["attributes"]>;
+  } {
+    return talent.attributes !== undefined;
   }
 
   function formatText(text: string) {
@@ -128,7 +109,7 @@ const Talentinfo: React.FC<passedData> = ({
 
   return (
     <div>
-      {charTalents ? (
+      {talentList.length > 0 ? (
         <div className="archive-panel w-80">
           <div className="archive-panel-header px-4 py-3">
             <p className="text-glow text-xs tracking-widest uppercase">
@@ -136,63 +117,59 @@ const Talentinfo: React.FC<passedData> = ({
             </p>
           </div>
           <ul className="archive-accordion">
-            {talentList!
-              .filter((talent) => talent && talent.description)
-              .map((talent, index) => (
-                <li key={index}>
-                  <div
-                    onClick={() => talentEdit(talent!.name)}
-                    className="archive-accordion-trigger flex cursor-pointer flex-row px-4 py-3 text-sm tracking-wide transition-colors"
-                  >
-                    {talent!.name}
-                    <span className="ml-auto">
-                      {openTalents.includes(talent!.name) ? "▲" : "▼"}
-                    </span>
+            {talentList.map((talent, index) => (
+              <li key={index}>
+                <div
+                  onClick={() => talentEdit(talent.name)}
+                  className="archive-accordion-trigger flex cursor-pointer flex-row px-4 py-3 text-sm tracking-wide transition-colors"
+                >
+                  {talent.name}
+                  <span className="ml-auto">
+                    {openTalents.includes(talent.name) ? "▲" : "▼"}
+                  </span>
+                </div>
+                {openTalents.includes(talent.name) && (
+                  <div className="archive-accordion-body px-4 py-3">
+                    <p className="text-xs text-white/70">
+                      {formatText(talent.description)}
+                    </p>
+                    {isCombat(talent) && (
+                      <div className="mt-2">
+                        <p className="text-xs tracking-widest text-white/50 uppercase">
+                          Talent Lvl{" "}
+                          <input
+                            className="archive-inline-input w-10 text-center tracking-normal normal-case outline-none"
+                            type="number"
+                            value={talentLevels[talent.name] ?? 1}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => changeTalentLevel(talent.name, e)}
+                          />
+                        </p>
+                        <ul className="divide-glow/10 mt-2 divide-y">
+                          {talent.attributes.labels.map((label, i) => {
+                            const substituted = substituteTalentParams(
+                              label,
+                              talent.attributes.parameters,
+                              displayTalentLevel(talent.name),
+                            );
+                            const [title, value] = substituted.split("|");
+                            return (
+                              <li
+                                key={i}
+                                className="flex justify-between py-1 text-xs text-white/50"
+                              >
+                                <span>{title}</span>
+                                <span className="text-white/70">{value}</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    )}
                   </div>
-                  {openTalents.includes(talent!.name) && (
-                    <div className="archive-accordion-body px-4 py-3">
-                      <p className="text-xs text-white/70">
-                        {formatText(talent!.description)}
-                      </p>
-                      {isCombat(talent) && (
-                        <div className="mt-2">
-                          <p className="text-xs tracking-widest text-white/50 uppercase">
-                            Talent Lvl{" "}
-                            <input
-                              className="archive-inline-input w-10 text-center tracking-normal normal-case outline-none"
-                              type="number"
-                              value={talentLevels[talent.name] ?? 1}
-                              onClick={(e) => e.stopPropagation()}
-                              onChange={(e) =>
-                                changeTalentLevel(talent.name, e)
-                              }
-                            />
-                          </p>
-                          <ul className="divide-glow/10 mt-2 divide-y">
-                            {talent.attributes.labels.map((label, i) => {
-                              const substituted = substituteTalentParams(
-                                label,
-                                talent.attributes.parameters,
-                                displayTalentLevel(talent.name),
-                              );
-                              const [title, value] = substituted.split("|");
-                              return (
-                                <li
-                                  key={i}
-                                  className="flex justify-between py-1 text-xs text-white/50"
-                                >
-                                  <span>{title}</span>
-                                  <span className="text-white/70">{value}</span>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </li>
-              ))}
+                )}
+              </li>
+            ))}
           </ul>
         </div>
       ) : (

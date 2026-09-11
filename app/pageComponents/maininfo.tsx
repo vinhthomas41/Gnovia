@@ -1,22 +1,30 @@
 import React, { useState } from "react";
-import genshindb from "genshin-db";
 import Talentinfo from "./maininfoComponents/talentinfo";
 import Constellationinfo from "./maininfoComponents/constellationinfo";
 import BuildInfo from "./maininfoComponents/buildinfo";
 import { findBuildMatches } from "@/lib/enkaBuildMatch";
 import { getCombatTalentLevels } from "@/lib/enkaSkillSlots";
 import type { LinkedUidRecord, ProfileState } from "@/lib/linkedUids";
+import type { ArchiveCharacter, ArchiveItemNames } from "@/lib/archiveTypes";
 
 interface passedData {
-  character: genshindb.Character | null;
+  character: ArchiveCharacter | null;
   linkedUids: LinkedUidRecord[];
   profiles: { [genshinUid: string]: ProfileState };
+  itemNames: ArchiveItemNames;
+  selectedCharacterName?: string;
+  detailsLoading?: boolean;
+  detailsError?: boolean;
 }
 
 const Maininfo: React.FC<passedData> = ({
   character,
   linkedUids,
   profiles,
+  itemNames,
+  selectedCharacterName,
+  detailsLoading,
+  detailsError,
 }) => {
   const [currentLevel, setCurrentLevel] = useState<number | string>(100);
   const [selectedBuildIndex, setSelectedBuildIndex] = useState(0);
@@ -60,13 +68,26 @@ const Maininfo: React.FC<passedData> = ({
       )
     : undefined;
   const unlockedConstellations = selectedMatch?.avatar.talentIdList?.length;
+  const stats = character?.statsByLevel[displayLevel - 1];
 
   return (
     <main
       className="archive-detail max-w-screen overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       id="mainInfo"
     >
-      {!character ? (
+      {detailsLoading ? (
+        <div className="archive-detail-status" role="status">
+          <span className="archive-detail-spinner" aria-hidden="true" />
+          Loading {selectedCharacterName}’s records…
+        </div>
+      ) : detailsError && selectedCharacterName ? (
+        <div
+          className="archive-detail-status archive-detail-error"
+          role="alert"
+        >
+          Couldn’t load {selectedCharacterName}’s records. Refresh to try again.
+        </div>
+      ) : !character ? (
         <h2 className="p-8 text-xs tracking-widest text-white/50 uppercase">
           Choose a character.
         </h2>
@@ -94,21 +115,21 @@ const Maininfo: React.FC<passedData> = ({
               <ul className="archive-data-list">
                 <li className="flex justify-between px-4 py-2 text-sm">
                   <span className="text-xs text-white/50 uppercase">HP</span>
-                  {character.stats(displayLevel, "+").hp?.toFixed(2)}
+                  {stats?.hp?.toFixed(2)}
                 </li>
                 <li className="flex justify-between px-4 py-2 text-sm">
                   <span className="text-xs text-white/50 uppercase">ATK</span>
-                  {character.stats(displayLevel, "+").attack?.toFixed(2)}
+                  {stats?.attack?.toFixed(2)}
                 </li>
                 <li className="flex justify-between px-4 py-2 text-sm">
                   <span className="text-xs text-white/50 uppercase">DEF</span>
-                  {character.stats(displayLevel, "+").defense?.toFixed(2)}
+                  {stats?.defense?.toFixed(2)}
                 </li>
                 <li className="flex justify-between px-4 py-2 text-sm">
                   <span className="text-xs text-white/50 uppercase">
                     {character.substatText}
                   </span>
-                  {character.stats(displayLevel, "+").specialized}
+                  {stats?.specialized}
                 </li>
               </ul>
             </div>
@@ -130,6 +151,7 @@ const Maininfo: React.FC<passedData> = ({
               matches={matches}
               selectedIndex={selectedBuildIndex}
               onSelectIndex={setSelectedBuildIndex}
+              itemNames={itemNames}
             />
           )}
         </>

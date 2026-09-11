@@ -1,17 +1,17 @@
 "use client";
 import React, { useState } from "react";
-import genshindb from "genshin-db";
 import starS from "../../public/selectedStar.png";
 import star from "../../public/Star.png";
 import Image from "next/image";
 import LinkedUidsPanel from "./linkedUidsPanel";
 import type { LinkedUidRecord, ProfileState } from "@/lib/linkedUids";
+import type { ArchiveCharacterSummary } from "@/lib/archiveTypes";
 
 interface passedData {
-  charList: genshindb.Character[];
-  sendData: (newChar: genshindb.Character) => void;
+  charList: ArchiveCharacterSummary[];
+  sendData: (newChar: ArchiveCharacterSummary) => void;
   favorites: string[] | null;
-  favoriteClick: (char: genshindb.Character) => void;
+  favoriteClick: (char: ArchiveCharacterSummary) => void;
   userUid: string | null;
   linkedUids: LinkedUidRecord[];
   profiles: { [genshinUid: string]: ProfileState };

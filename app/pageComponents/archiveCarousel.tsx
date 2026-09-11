@@ -142,14 +142,35 @@ export default function ArchiveCarousel() {
   }
 
   useEffect(() => {
+    router.prefetch("/characters");
+    router.prefetch("/materials");
+  }, [router]);
+
+  useEffect(() => {
+    if (!current.href) return;
+    const detailUrl = `/api/archive${current.href}`;
+    const warmCache = () => {
+      void fetch(detailUrl, { cache: "force-cache" })
+        .then((response) => response.arrayBuffer())
+        .catch(() => undefined);
+    };
+    const preloadTimer = window.setTimeout(warmCache, 350);
+    return () => window.clearTimeout(preloadTimer);
+  }, [current.href]);
+
+  useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "ArrowLeft") move(-1);
-      if (event.key === "ArrowRight") move(1);
-      if (event.key === "Enter") enterSection();
+      if (event.key === "ArrowLeft") {
+        setSelected((value) => (value - 1 + SECTIONS.length) % SECTIONS.length);
+      }
+      if (event.key === "ArrowRight") {
+        setSelected((value) => (value + 1) % SECTIONS.length);
+      }
+      if (event.key === "Enter" && current.href) router.push(current.href);
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  });
+  }, [current.href, router]);
 
   return (
     <main className="archive-landing">
@@ -164,9 +185,7 @@ export default function ArchiveCarousel() {
             <h1>Archive</h1>
           </div>
         </div>
-        <p className="archive-stat">
-          
-        </p>
+        <p className="archive-stat"></p>
       </header>
 
       <section className="archive-picker" aria-label="Archive collections">

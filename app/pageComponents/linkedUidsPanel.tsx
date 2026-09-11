@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { LinkedUidRecord, ProfileState } from "@/lib/linkedUids";
 
 interface passedData {
@@ -31,6 +32,20 @@ const LinkedUidsPanel: React.FC<passedData> = ({
     if (!isOpen) return;
     const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
   }, [isOpen]);
 
   function linkUid() {
@@ -74,96 +89,114 @@ const LinkedUidsPanel: React.FC<passedData> = ({
 
   return (
     <>
-      <div
+      <button
+        type="button"
         className="hover:bg-glow flex w-full cursor-pointer justify-center py-3 text-xs tracking-widest uppercase transition-colors hover:text-black"
         onClick={() => setIsOpen(true)}
       >
         Linked UIDs{linkedUids.length > 0 ? ` (${linkedUids.length})` : ""}
-      </div>
+      </button>
 
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#030817]/80 backdrop-blur-sm"
-          onClick={() => setIsOpen(false)}
-        >
-          <div
-            className="archive-panel w-full max-w-md text-white"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="archive-panel-header flex items-center justify-between px-4 py-3">
-              <p className="text-glow text-xs tracking-widest uppercase">
-                Linked Genshin UIDs
-              </p>
-              <button
-                className="hover:bg-glow px-2 text-xs tracking-widest uppercase transition-colors hover:text-black"
-                onClick={() => setIsOpen(false)}
+      {isOpen &&
+        createPortal(
+          <div className="archive-uid-overlay" onClick={() => setIsOpen(false)}>
+            <div
+              className="archive-uid-dialog archive-panel text-white"
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="linked-uids-title"
+            >
+              <div className="archive-panel-header flex items-center justify-between px-4 py-3">
+                <p
+                  id="linked-uids-title"
+                  className="text-glow text-sm tracking-widest uppercase"
+                >
+                  Linked Genshin UIDs
+                </p>
+                <button
+                  type="button"
+                  className="archive-uid-close"
+                  onClick={() => setIsOpen(false)}
+                  aria-label="Close linked UIDs"
+                >
+                  ×
+                </button>
+              </div>
+
+              <form
+                className="archive-uid-form"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  linkUid();
+                }}
               >
-                Close
-              </button>
-            </div>
-
-            <div className="border-glow/20 flex gap-2 border-b p-4">
-              <input
-                className="archive-search flex-1 px-3 py-2 text-sm outline-none"
-                type="text"
-                placeholder="9-digit UID"
-                value={newUidInput}
-                onChange={(e) => setNewUidInput(e.target.value)}
-              />
-              <button
-                className="border-glow hover:bg-glow border px-3 text-xs tracking-widest uppercase transition-colors hover:text-black"
-                onClick={linkUid}
-              >
-                Link
-              </button>
-            </div>
-            {linkError && (
-              <p className="px-4 pb-2 text-xs text-red-400">{linkError}</p>
-            )}
-
-            <ul className="divide-glow/20 max-h-80 divide-y overflow-y-auto">
-              {linkedUids.length === 0 && (
-                <li className="px-4 py-3 text-xs text-white/50">
-                  No linked UIDs yet.
-                </li>
+                <input
+                  className="archive-search flex-1 px-3 py-2 text-sm outline-none"
+                  type="text"
+                  placeholder="9-digit UID"
+                  value={newUidInput}
+                  onChange={(e) => setNewUidInput(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  className="border-glow hover:bg-glow border px-3 text-xs tracking-widest uppercase transition-colors hover:text-black"
+                >
+                  Link
+                </button>
+              </form>
+              {linkError && (
+                <p className="px-4 pb-2 text-xs text-red-400">{linkError}</p>
               )}
-              {linkedUids.map((record) => {
-                const profile = profiles[record.genshinUid];
-                const remaining = refreshSecondsRemaining(record.genshinUid);
-                return (
-                  <li key={record.docId} className="px-4 py-3 text-sm">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold">{record.genshinUid}</span>
-                      <div className="flex items-center gap-2">
-                        <button
-                          className="border-glow/40 hover:bg-glow border px-2 py-1 text-xs tracking-widest uppercase transition-colors hover:text-black disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-white"
-                          disabled={
-                            remaining > 0 || profile?.status === "loading"
-                          }
-                          onClick={() => onRefreshUid(record.genshinUid)}
-                        >
-                          {remaining > 0
-                            ? `Refresh (${remaining}s)`
-                            : "Refresh"}
-                        </button>
-                        <button
-                          className="border-glow/40 hover:bg-glow border px-2 py-1 text-xs tracking-widest uppercase transition-colors hover:text-black"
-                          onClick={() => onUnlinkUid(record)}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                    <p className="mt-1 text-xs text-white/60">
-                      {describeProfile(profile)}
-                    </p>
+
+              <ul className="divide-glow/20 max-h-80 divide-y overflow-y-auto">
+                {linkedUids.length === 0 && (
+                  <li className="px-4 py-3 text-xs text-white/50">
+                    No linked UIDs yet.
                   </li>
-                );
-              })}
-            </ul>
-          </div>
-        </div>
-      )}
+                )}
+                {linkedUids.map((record) => {
+                  const profile = profiles[record.genshinUid];
+                  const remaining = refreshSecondsRemaining(record.genshinUid);
+                  return (
+                    <li key={record.docId} className="archive-uid-record">
+                      <div className="archive-uid-record-row">
+                        <span className="archive-uid-number">
+                          {record.genshinUid}
+                        </span>
+                        <div className="archive-uid-actions">
+                          <button
+                            type="button"
+                            className="border-glow/40 hover:bg-glow border px-2 py-1 text-xs tracking-widest uppercase transition-colors hover:text-black disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-white"
+                            disabled={
+                              remaining > 0 || profile?.status === "loading"
+                            }
+                            onClick={() => onRefreshUid(record.genshinUid)}
+                          >
+                            {remaining > 0
+                              ? `Refresh (${remaining}s)`
+                              : "Refresh"}
+                          </button>
+                          <button
+                            type="button"
+                            className="border-glow/40 hover:bg-glow border px-2 py-1 text-xs tracking-widest uppercase transition-colors hover:text-black"
+                            onClick={() => onUnlinkUid(record)}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                      <p className="mt-1 text-xs text-white/60">
+                        {describeProfile(profile)}
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </div>,
+          document.body,
+        )}
     </>
   );
 };

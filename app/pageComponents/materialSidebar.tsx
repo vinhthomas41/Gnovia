@@ -4,13 +4,13 @@ import Image from "next/image";
 import {
   groupMaterialsByType,
   materialIconUrl,
-  type MaterialInfo,
+  type MaterialSummary,
 } from "@/lib/materialInfo";
 
 interface passedData {
-  materials: MaterialInfo[];
-  selected: MaterialInfo | null;
-  onSelect: (material: MaterialInfo) => void;
+  materials: MaterialSummary[];
+  selected: MaterialSummary | null;
+  onSelect: (material: MaterialSummary) => void;
 }
 
 const MaterialSidebar: React.FC<passedData> = ({
