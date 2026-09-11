@@ -34,7 +34,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              'try{var t=localStorage.getItem("gnovia-archive-theme");if(t==="blue"||t==="teal"||t==="plum")document.documentElement.dataset.archiveTheme=t;else document.documentElement.dataset.archiveTheme="blue"}catch(e){document.documentElement.dataset.archiveTheme="blue"}',
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${cinzel.variable} ${robotoSlab.variable} antialiased`}
       >

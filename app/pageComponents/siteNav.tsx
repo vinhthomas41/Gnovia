@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ThemeSwitcher from "./themeSwitcher";
 
 const LINKS = [
   { href: "/characters", label: "Characters" },
@@ -19,16 +20,19 @@ export default function SiteNav() {
           Archive
         </span>
       </Link>
-      <div className="archive-nav-links flex gap-2">
-        {LINKS.map(({ href, label }) => (
-          <Link
-            key={href}
-            href={href}
-            className={pathname?.startsWith(href) ? "is-active" : ""}
-          >
-            {label}
-          </Link>
-        ))}
+      <div className="archive-nav-actions">
+        <div className="archive-nav-links flex gap-2">
+          {LINKS.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className={pathname?.startsWith(href) ? "is-active" : ""}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+        <ThemeSwitcher />
       </div>
     </nav>
   );
