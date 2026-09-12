@@ -24,15 +24,20 @@ export interface ArchiveConstellation {
 export interface ArchiveCharacterSummary {
   id: number;
   name: string;
+  elementType: string;
+  elementText: string;
   images: {
     hoyowiki_icon?: string;
+    gachaSplash?: string;
+    rosterIcon?: string;
   };
 }
 
 export interface ArchiveCharacter extends ArchiveCharacterSummary {
+  title: string;
   description: string;
+  rarity: number;
   substatText: string;
-  elementType: string;
   statsByLevel: CharacterStatLine[];
   talents: ArchiveTalent[];
   constellations: ArchiveConstellation[];

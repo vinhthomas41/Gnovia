@@ -1,6 +1,7 @@
 "use client";
 
 const THEMES = [
+  { id: "elemental", label: "Adaptive elemental" },
   { id: "blue", label: "Asterium blue" },
   { id: "teal", label: "Lunary teal" },
   { id: "plum", label: "Solenne plum" },

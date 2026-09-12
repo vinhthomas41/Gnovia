@@ -18,7 +18,7 @@ const MaterialDetail: React.FC<passedData> = ({
   if (!material) {
     return (
       <main
-        className="archive-detail max-w-screen overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="archive-detail max-w-screen overflow-y-auto"
         id="materialDetail"
       >
         {loading ? (
@@ -47,7 +47,7 @@ const MaterialDetail: React.FC<passedData> = ({
 
   return (
     <main
-      className="archive-detail max-w-screen overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="archive-detail max-w-screen overflow-y-auto"
       id="materialDetail"
     >
       <div className="archive-panel mx-8 my-8">

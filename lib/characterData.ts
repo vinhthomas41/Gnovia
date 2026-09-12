@@ -1,6 +1,7 @@
 import "server-only";
 
 import genshindb from "genshin-db";
+import type { Character } from "genshin-db";
 import type {
   ArchiveCharacter,
   ArchiveCharacterSummary,
@@ -8,6 +9,18 @@ import type {
   ArchiveItemNames,
   ArchiveTalent,
 } from "@/lib/archiveTypes";
+
+const ENKA_UI_BASE = "https://enka.network/ui/";
+
+function getCharacterImages(character: Character) {
+  return {
+    hoyowiki_icon: character.images.hoyowiki_icon,
+    rosterIcon: `${ENKA_UI_BASE}${character.images.filename_icon}.png`,
+    gachaSplash: character.images.filename_gachaSplash
+      ? `${ENKA_UI_BASE}${character.images.filename_gachaSplash}.png`
+      : undefined,
+  };
+}
 
 function getTalents(name: string): ArchiveTalent[] {
   const data = genshindb.talents(name);
@@ -57,10 +70,13 @@ export function getArchiveCharacters(): ArchiveCharacter[] {
       {
         id: character.id,
         name: character.name,
+        title: character.title,
         description: character.description,
+        rarity: character.rarity,
         substatText: character.substatText,
         elementType: character.elementType,
-        images: { hoyowiki_icon: character.images.hoyowiki_icon },
+        elementText: character.elementText,
+        images: getCharacterImages(character),
         statsByLevel: Array.from({ length: 100 }, (_, index) =>
           character.stats(index + 1, "+"),
         ),
@@ -98,7 +114,9 @@ export function getArchiveCharacterSummaries(): ArchiveCharacterSummary[] {
           {
             id: character.id,
             name: character.name,
-            images: { hoyowiki_icon: character.images.hoyowiki_icon },
+            elementType: character.elementType,
+            elementText: character.elementText,
+            images: getCharacterImages(character),
           },
         ]
       : [];

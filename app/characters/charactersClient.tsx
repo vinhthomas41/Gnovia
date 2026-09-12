@@ -39,7 +39,10 @@ export default function CharactersClient({
   characters,
 }: CharactersClientProps) {
   const [selectedCharacterId, setSelectedCharacterId] = useState<number | null>(
-    null,
+    () =>
+      characters.find((character) => character.images.gachaSplash)?.id ??
+      characters[0]?.id ??
+      null,
   );
   const [detailData, setDetailData] = useState<CharacterDetailResponse | null>(
     null,
@@ -73,6 +76,25 @@ export default function CharactersClient({
     detailData?.characters.find(
       (character) => character.id === selectedCharacterId,
     ) ?? null;
+  const selectedCharacter = characters.find(
+    (character) => character.id === selectedCharacterId,
+  );
+
+  useEffect(() => {
+    const element = selectedCharacter?.elementType
+      .replace(/^ELEMENT_/, "")
+      .toLowerCase();
+    if (element) {
+      document.documentElement.setAttribute("data-character-element", element);
+    }
+  }, [selectedCharacter?.elementType]);
+
+  useEffect(
+    () => () => {
+      document.documentElement.removeAttribute("data-character-element");
+    },
+    [],
+  );
 
   useEffect(() => {
     signInAnonymously(auth).catch((error) =>
@@ -209,10 +231,11 @@ export default function CharactersClient({
   return (
     <div className="archive-database-shell archive-brutalist-type text-textColor1 relative flex h-screen flex-col overflow-hidden">
       <SiteNav />
-      <div className="archive-database-body relative z-10 flex min-h-0 flex-1">
+      <div className="archive-database-body archive-character-body relative z-10 flex min-h-0 flex-1">
         <Sidebar
           charList={characters}
           sendData={(character) => setSelectedCharacterId(character.id)}
+          selectedCharacterId={selectedCharacterId}
           favorites={favoriteList}
           favoriteClick={favoriteEdit}
           userUid={userUid}
