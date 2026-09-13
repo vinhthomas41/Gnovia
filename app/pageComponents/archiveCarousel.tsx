@@ -130,7 +130,7 @@ export default function ArchiveCarousel() {
   }, [current.href, router]);
 
   return (
-    <main className="archive-landing">
+    <main className="archive-landing archive-brutalist-type">
       <header className="archive-header">
         <div className="archive-brand">
           <span className="archive-brand-mark" aria-hidden="true">
@@ -150,7 +150,7 @@ export default function ArchiveCarousel() {
             <span /> Private collection <span />
           </p>
           <h2>Choose an archive</h2>
-          <p></p>
+          <p>Select a collection to enter its records.</p>
         </div>
 
         <div className="archive-carousel-stage">
