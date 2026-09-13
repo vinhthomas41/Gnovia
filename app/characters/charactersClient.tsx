@@ -25,6 +25,7 @@ import { fetchEnkaProfile } from "@/lib/enka";
 import type { LinkedUidRecord, ProfileState } from "@/lib/linkedUids";
 
 const auth = getAuth();
+const CHARACTER_ARCHIVE_VERSION = "splash-art-v2";
 
 interface CharactersClientProps {
   characters: ArchiveCharacterSummary[];
@@ -55,7 +56,7 @@ export default function CharactersClient({
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch("/api/archive/characters", {
+    fetch(`/api/archive/characters?v=${CHARACTER_ARCHIVE_VERSION}`, {
       cache: "force-cache",
       signal: controller.signal,
     })
@@ -72,13 +73,27 @@ export default function CharactersClient({
     return () => controller.abort();
   }, []);
 
-  const currentChar =
-    detailData?.characters.find(
-      (character) => character.id === selectedCharacterId,
-    ) ?? null;
   const selectedCharacter = characters.find(
     (character) => character.id === selectedCharacterId,
   );
+  const selectedDetailCharacter =
+    detailData?.characters.find(
+      (character) => character.id === selectedCharacterId,
+    ) ?? null;
+  const currentChar = selectedDetailCharacter
+    ? {
+        ...selectedDetailCharacter,
+        images: {
+          ...selectedDetailCharacter.images,
+          rosterIcon:
+            selectedCharacter?.images.rosterIcon ??
+            selectedDetailCharacter.images.rosterIcon,
+          gachaSplash:
+            selectedCharacter?.images.gachaSplash ??
+            selectedDetailCharacter.images.gachaSplash,
+        },
+      }
+    : null;
 
   useEffect(() => {
     const element = selectedCharacter?.elementType
